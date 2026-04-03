@@ -16,12 +16,13 @@ The project demonstrates backend engineering concepts such as **JWT authenticati
 * OTP based password reset using email
 * Role based authorization (Student / Teacher / Admin)
 * Spring Security configuration with method-level access control
+* Filtering , Sorting and Pagination of data
 
 ### Student Functionality
 
-* View attendance records
+* View attendance records(with filters)
 * Track attendance percentage
-* View academic results and grades
+* View academic results and grades(with filters)
 * Submit leave requests
 * Receive notifications
 * View timetable
