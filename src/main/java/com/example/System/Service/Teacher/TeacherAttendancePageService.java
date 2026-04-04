@@ -10,6 +10,7 @@ import com.example.System.Repository.StudentRepository;
 import com.example.System.Repository.StudentSubjectRepository;
 import com.example.System.Repository.TeacherRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -69,6 +70,7 @@ public class TeacherAttendancePageService {
                 .build();
     }
 
+    @CacheEvict(value = "attendancePage" , allEntries = true)
     public void submitAttendance(Long id, List<StudentListRequestDTO> studentListRequestDTOS) {
 
         Teacher teacher = teacherRepository.findById(id).orElseThrow(() ->

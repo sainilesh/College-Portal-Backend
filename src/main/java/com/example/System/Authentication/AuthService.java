@@ -9,7 +9,7 @@ import com.example.System.Enum.RoleType;
 import com.example.System.Repository.StudentRepository;
 import com.example.System.Repository.TeacherRepository;
 import com.example.System.Repository.UserRepository;
-import com.example.System.Service.EmailService;
+import com.example.System.Email.EmailService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;

@@ -1,11 +1,15 @@
 package com.example.System.DTO.Student.Results;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
+import java.io.Serializable;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
-public class ResultTableDTO {
+public class ResultTableDTO implements Serializable {
 
     private Long id;
     private String subjectCode;

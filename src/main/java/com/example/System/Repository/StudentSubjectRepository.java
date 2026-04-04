@@ -1,5 +1,6 @@
 package com.example.System.Repository;
 
+import com.example.System.Entity.Student;
 import com.example.System.Entity.StudentSubject;
 import com.example.System.Enum.AttendaceStatusEnum;
 import com.example.System.Enum.TeacherAttendanceStatusEnum;
@@ -120,6 +121,16 @@ AND ss.conductedAt = :conductedAt
 AND ss.student.section.name = :section
 """)
     List<StudentSubject> findByTeacherAndConductedAt(@Param("teacherId") Long teacherId, @Param("conductedAt") LocalDate date, @Param("section") String section);
+
+    @Query("""
+SELECT ss.student
+FROM StudentSubject ss
+GROUP BY ss.student
+HAVING
+(SUM(CASE WHEN ss.attendanceStatus='PRESENT' THEN 1 ELSE 0 END)*100.0)
+ / COUNT(ss) < 75
+""")
+    List<Student> findStudentsBelow75();
 
 }
 

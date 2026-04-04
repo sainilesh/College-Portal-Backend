@@ -16,6 +16,7 @@ import com.example.System.Repository.StudentSubjectRepository;
 import com.example.System.Repository.TimeTableRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
@@ -31,7 +32,9 @@ public class StudentDashboardPageService {
     private final NotificationRepository notificationRepository;
     private final TimeTableRepository timeTableRepository;
 
+
     public StudentDashboardPageDTO getStudentDashboard(Long id){
+
         Student student = studentRepository.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("Student not found"));
 

@@ -4,9 +4,11 @@ import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.domain.Page;
 
+import java.io.Serializable;
+
 @Data
 @Builder
-public class StudentAttendancePageDTO {
+public class StudentAttendancePageDTO implements Serializable {
 
     private Long id;
     private Long totalClasses;

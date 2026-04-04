@@ -7,6 +7,7 @@ import com.example.System.Repository.GradeRepository;
 import com.example.System.Repository.SubjectRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -20,6 +21,11 @@ public class StudentResultPageService {
     private final GradeRepository gradeRepository;
     private final SubjectRepository subjectRepository;
 
+
+    @Cacheable(
+            value = "studentResultsPage",
+            key = "#studentId + ':' + #semester"
+    )
     public StudentResultsPageDTO getStudentResult(Long studentId, String semester) {
 
         long totalObtainedCredits = 0;

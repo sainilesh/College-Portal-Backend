@@ -7,8 +7,11 @@ import com.example.System.Entity.TimeTable;
 import com.example.System.Enum.AttendaceStatusEnum;
 import com.example.System.Repository.StudentSubjectRepository;
 import com.example.System.Repository.TimeTableRepository;
+import com.example.System.SystemApplication;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +29,13 @@ public class StudentAttendancePageService {
     private final StudentSubjectRepository studentSubjectRepository;
     private final TimeTableRepository timeTableRepository;
 
+    @Cacheable(
+            value = "attendancePage",
+            key = "#id + ':' + #semester + ':' + #subject + ':' + #date + ':' + #page + ':' + #size"
+    )
     public StudentAttendancePageDTO getAttendancePage(Long id, String semester, String subject, LocalDate date,int page,int size) {
+
+        System.out.println("getting from the DB....");
 
         Long totalClassesAttended = studentSubjectRepository.getTotalClassesAttended(id, AttendaceStatusEnum.PRESENT).orElseThrow(() ->
                 new IllegalArgumentException("Total classes  attended not found"));

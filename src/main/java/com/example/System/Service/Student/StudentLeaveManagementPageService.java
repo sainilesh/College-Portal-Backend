@@ -13,6 +13,7 @@ import com.example.System.Repository.LeaveRepository;
 import com.example.System.Repository.StudentRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,7 +34,10 @@ public class StudentLeaveManagementPageService {
     private final LeaveRepository leaveRepository;
     private final StudentRepository studentRepository;
 
+
     public StudentLeaveManagementPageDTO getLeaveManagementPage(Long studentId, LeaveStatusEnum leaveStatus, LeaveReasonEnum leaveReason, int page, int size, LocalDate date) {
+
+        System.out.println("getting from db.......");
 
         Long leavesTaken = leaveRepository.getTotalLeaves(studentId).orElseThrow(() ->
                 new IllegalArgumentException("No leaves for the student id"));

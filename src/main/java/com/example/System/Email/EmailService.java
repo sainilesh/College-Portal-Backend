@@ -1,4 +1,4 @@
-package com.example.System.Service;
+package com.example.System.Email;
 
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
