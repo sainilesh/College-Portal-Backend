@@ -1,13 +1,16 @@
 package com.example.System.DTO.Student.Dashboard;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
-public class NotificationsDTO {
+public class NotificationsDTO implements Serializable {
 
     private Long id;
     private String title;

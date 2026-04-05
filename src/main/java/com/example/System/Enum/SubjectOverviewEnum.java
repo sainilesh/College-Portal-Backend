@@ -1,6 +1,8 @@
 package com.example.System.Enum;
 
-public enum SubjectOverviewEnum {
+import java.io.Serializable;
+
+public enum SubjectOverviewEnum implements Serializable {
     SAFE,
     WARNING,
     OK

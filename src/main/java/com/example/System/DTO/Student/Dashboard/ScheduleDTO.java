@@ -1,17 +1,20 @@
 package com.example.System.DTO.Student.Dashboard;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
-public class ScheduleDTO {
+public class ScheduleDTO implements Serializable {
     private Long id;
     private String className;
     private LocalTime startTime;
-    private boolean HappeningNow;
+    private boolean happeningNow;
     private String Location;
 }

@@ -1,5 +1,8 @@
 package com.example.System.Configuration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,6 +45,15 @@ public class AppConfig {
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
 
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        mapper.activateDefaultTyping(
+                mapper.getPolymorphicTypeValidator(),
+                ObjectMapper.DefaultTyping.NON_FINAL
+        );
+
         RedisCacheConfiguration config =
                 RedisCacheConfiguration.defaultCacheConfig()
                         .entryTtl(Duration.ofMinutes(10))
@@ -51,7 +63,7 @@ public class AppConfig {
                         )
                         .serializeValuesWith(
                                 RedisSerializationContext.SerializationPair
-                                        .fromSerializer(new GenericJackson2JsonRedisSerializer())
+                                        .fromSerializer(new GenericJackson2JsonRedisSerializer(mapper))
                         );
 
         return RedisCacheManager.builder(connectionFactory)

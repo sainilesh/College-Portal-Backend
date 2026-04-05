@@ -33,7 +33,13 @@ public class StudentDashboardPageService {
     private final TimeTableRepository timeTableRepository;
 
 
+    @Cacheable(
+            value = "studentDashboardPage",
+            key = "#id"
+    )
     public StudentDashboardPageDTO getStudentDashboard(Long id){
+
+        System.out.println("getting from db......");
 
         Student student = studentRepository.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("Student not found"));
@@ -67,7 +73,7 @@ public class StudentDashboardPageService {
                 .id(student.getId())
                 .name(student.getName())
                 .classesAttended(classesAttended)
-                .classesMissed(classesConducted - classesAttended)
+                .classesMissed(classesConducted-classesAttended)
                 .notifications(notificationsDTOS)
                 .overallAttendance(overallAttendance)
                 .schedules(scheduleDTOS)
@@ -87,7 +93,7 @@ public class StudentDashboardPageService {
                 .className(timeTable.getSubject().getName())
                 .startTime(timeTable.getStartTime())
                 .Location(timeTable.getLocation())
-                .HappeningNow(HappeningNow)
+                .happeningNow(HappeningNow)
                 .build();
     }
 
