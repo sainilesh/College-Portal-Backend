@@ -29,7 +29,7 @@ public class TeacherLeaveRequestController {
         User user = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow();
 
-        Long teacherId = user.getStudent().getId();
+        Long teacherId = user.getTeacher().getId();
         List<TeacherLeaveRequestPageDTO> teacherLeaveRequestPageDTO = teacherLeaveRequestService.getLeaveRequestPage(teacherId);
         return ResponseEntity.status(HttpStatus.OK).body(teacherLeaveRequestPageDTO);
     }

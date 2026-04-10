@@ -33,7 +33,7 @@ public class TeacherAttendancePageController {
         User user = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow();
 
-        Long teacherId = user.getStudent().getId();
+        Long teacherId = user.getTeacher().getId();
 
         if(date == null) {date = LocalDate.now();}
         TeacherAttendancePageDTO teacherAttendancePageDTO = teacherAttendancePageService.getAttendancePage(teacherId, section, date);
@@ -46,7 +46,7 @@ public class TeacherAttendancePageController {
         User user = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow();
 
-        Long teacherId = user.getStudent().getId();
+        Long teacherId = user.getTeacher().getId();
         teacherAttendancePageService.submitAttendance(teacherId, studentListRequestDTOS);
         return ResponseEntity.status(HttpStatus.OK).build();
     }

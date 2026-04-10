@@ -1,11 +1,15 @@
 package com.example.System.DTO.Teacher.Dashboard;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
+import java.io.Serializable;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class AttendanceAnalyticsDTO {
+public class AttendanceAnalyticsDTO implements Serializable {
 
     private Long id;
     private Double averageAttendance;

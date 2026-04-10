@@ -29,7 +29,7 @@ public class TeacherExamPageController {
         User user = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow();
 
-        Long teacherId = user.getStudent().getId();
+        Long teacherId = user.getTeacher().getId();
         TeacherExamPageDTO teacherExamPageDTO = teacherExamPageService.getTeacherExamPage(teacherId);
         return ResponseEntity.status(HttpStatus.OK).body(teacherExamPageDTO);
     }
@@ -40,7 +40,7 @@ public class TeacherExamPageController {
         User user = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow();
 
-        Long teacherId = user.getStudent().getId();
+        Long teacherId = user.getTeacher().getId();
         teacherExamPageService.updateStudentResults(teacherExamPageRequests, teacherId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }

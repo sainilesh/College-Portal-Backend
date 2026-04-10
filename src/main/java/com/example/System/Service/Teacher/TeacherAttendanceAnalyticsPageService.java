@@ -10,6 +10,7 @@ import com.example.System.Repository.StudentSubjectRepository;
 import com.example.System.Repository.TeacherRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class TeacherAttendanceAnalyticsPageService {
     private final TeacherRepository teacherRepository;
     private final StudentSubjectRepository studentSubjectRepository;
 
+    @Cacheable(value = "teacherAttendanceAnalytics")
     public TeacherAttendanceAnalyticsDTO getTeacherAttendanceAnalyticsDTO(Long id, String section) {
 
         Teacher teacher = teacherRepository.findById(id).orElseThrow(() ->

@@ -1,9 +1,11 @@
 package com.example.System.DTO.Teacher;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class TeacherExamTableDTO {
 

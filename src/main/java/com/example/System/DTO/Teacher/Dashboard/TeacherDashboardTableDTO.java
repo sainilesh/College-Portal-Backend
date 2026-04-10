@@ -1,14 +1,17 @@
 package com.example.System.DTO.Teacher.Dashboard;
 
 import com.example.System.Enum.TeacherAttendanceStatusEnum;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
+import java.io.Serializable;
 import java.time.LocalTime;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class TeacherDashboardTableDTO {
+public class TeacherDashboardTableDTO implements Serializable {
 
     private Long id;
     private String section;

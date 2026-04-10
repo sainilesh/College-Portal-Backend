@@ -1,14 +1,17 @@
 package com.example.System.DTO.Teacher.Dashboard;
 
 import com.example.System.DTO.Student.Dashboard.NotificationsDTO;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
+import java.io.Serializable;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class TeacherDashboardPageDTO {
+public class TeacherDashboardPageDTO implements Serializable {
 
     private Long id;
     private Long lowAttendance;

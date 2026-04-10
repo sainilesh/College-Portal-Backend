@@ -28,7 +28,7 @@ public class TeacherDashboardPageController {
         User user = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow();
 
-        Long teacherId = user.getStudent().getId();
+        Long teacherId = user.getTeacher().getId();
         TeacherDashboardPageDTO teacherDashboardPageDTO = teacherDashboardPageService.getTeacherDashboardPageDTO(teacherId);
         return ResponseEntity.status(HttpStatus.OK).body(teacherDashboardPageDTO);
     }

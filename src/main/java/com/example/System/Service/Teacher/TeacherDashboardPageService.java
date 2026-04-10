@@ -10,6 +10,7 @@ import com.example.System.Entity.TimeTable;
 import com.example.System.Repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -27,6 +28,7 @@ public class TeacherDashboardPageService {
     private final TimeTableRepository timeTableRepository;
     private final NotificationRepository notificationRepository;
 
+    @Cacheable(value = "teacherDashboard")
     public TeacherDashboardPageDTO getTeacherDashboardPageDTO(Long id) {
 
         Teacher teacher = teacherRepository.findById(id).orElseThrow(() ->

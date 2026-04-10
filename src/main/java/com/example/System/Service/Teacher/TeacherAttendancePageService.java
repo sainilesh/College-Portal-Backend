@@ -6,6 +6,8 @@ import com.example.System.DTO.Teacher.TeacherAttendancePageDTO;
 import com.example.System.Entity.Student;
 import com.example.System.Entity.StudentSubject;
 import com.example.System.Entity.Teacher;
+import com.example.System.Events.AttendanceEvent;
+import com.example.System.Publisher.AttendanceEventPublisher;
 import com.example.System.Repository.StudentRepository;
 import com.example.System.Repository.StudentSubjectRepository;
 import com.example.System.Repository.TeacherRepository;
@@ -23,6 +25,7 @@ public class TeacherAttendancePageService {
     private final TeacherRepository teacherRepository;
     private final StudentRepository studentRepository;
     private final StudentSubjectRepository studentSubjectRepository;
+    private final AttendanceEventPublisher  attendanceEventPublisher;
 
     public TeacherAttendancePageDTO getAttendancePage(Long id, String section, LocalDate date) {
 
@@ -70,7 +73,7 @@ public class TeacherAttendancePageService {
                 .build();
     }
 
-    @CacheEvict(value = "attendancePage" , allEntries = true)
+    //@CacheEvict(value = "attendancePage" , allEntries = true)
     public void submitAttendance(Long id, List<StudentListRequestDTO> studentListRequestDTOS) {
 
         Teacher teacher = teacherRepository.findById(id).orElseThrow(() ->
@@ -91,6 +94,14 @@ public class TeacherAttendancePageService {
             studentSubject.setSubject(teacher.getSubject());
 
             studentSubjectRepository.save(studentSubject);
+
+            AttendanceEvent event = new AttendanceEvent();
+            event.setStudentId(student.getId());
+            event.setStudentEmail(student.getUser().getEmail());
+            event.setSubjectName(studentSubject.getSubject().getName());
+            event.setStatus("PRESENT");
+
+            attendanceEventPublisher.publishAttendanceEvent(event);
         }
     }
 

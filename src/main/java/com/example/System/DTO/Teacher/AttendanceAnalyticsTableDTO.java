@@ -1,11 +1,15 @@
 package com.example.System.DTO.Teacher;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
+import java.io.Serializable;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 @Builder
-public class AttendanceAnalyticsTableDTO {
+public class AttendanceAnalyticsTableDTO implements Serializable {
     private Long id;
     private String name;
     private String rollNo;

@@ -27,7 +27,7 @@ public class TeacherAttendanceAnalyticsPageController {
         User user = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow();
 
-        Long teacherId = user.getStudent().getId();
+        Long teacherId = user.getTeacher().getId();
         TeacherAttendanceAnalyticsDTO teacherAttendanceAnalyticsDTO = teacherAttendanceAnalyticsPageService.getTeacherAttendanceAnalyticsDTO(teacherId,section);
         return ResponseEntity.status(HttpStatus.OK).body(teacherAttendanceAnalyticsDTO);
     }

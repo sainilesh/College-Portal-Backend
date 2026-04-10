@@ -31,17 +31,6 @@ public class AppConfig {
         return template;
     }
 
-//    @Configuration
-//    public static class RabbitMQConfig {
-//
-//        public static final String QUEUE = "attendance.notification.queue";
-//
-//        @Bean
-//        public Queue queue() {
-//            return new Queue(QUEUE, true);
-//        }
-//    }
-
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
 

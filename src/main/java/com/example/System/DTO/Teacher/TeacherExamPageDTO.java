@@ -1,11 +1,13 @@
 package com.example.System.DTO.Teacher;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class TeacherExamPageDTO {
 
