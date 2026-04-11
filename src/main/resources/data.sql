@@ -82,7 +82,9 @@ INSERT INTO section (name,teacher_id) VALUES
 INSERT INTO users (username, password, email, student_id,roles,teacher_id)
 VALUES
     ('rahul', '$2a$10$gcM05FFyjHvkurlmbW9ske.716xFixMFPLZUPHIPw5CuEQy81us3.','godasrikar@gmail.com', 1,'STUDENT',null),
-    ('srikar', '$2a$10$gcM05FFyjHvkurlmbW9ske.716xFixMFPLZUPHIPw5CuEQy81us3.', 'srikargoda2010@gmail.com',null,'TEACHER',1);
+    ('srikar', '$2a$10$gcM05FFyjHvkurlmbW9ske.716xFixMFPLZUPHIPw5CuEQy81us3.', 'srikargoda2010@gmail.com',null,'TEACHER',1),
+    ('srikar345', '$2a$10$gcM05FFyjHvkurlmbW9ske.716xFixMFPLZUPHIPw5CuEQy81us3.', 'srikargoda@gmail.com',4,'STUDENT',null);
+
 
 
 

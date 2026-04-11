@@ -29,10 +29,7 @@ public class StudentAttendancePageService {
     private final StudentSubjectRepository studentSubjectRepository;
     private final TimeTableRepository timeTableRepository;
 
-    @Cacheable(
-            value = "attendancePage",
-            key = "#id + ':' + #semester + ':' + #subject + ':' + #date + ':' + #page + ':' + #size"
-    )
+
     public StudentAttendancePageDTO getAttendancePage(Long id, String semester, String subject, LocalDate date,int page,int size) {
 
         System.out.println("getting from the DB....");

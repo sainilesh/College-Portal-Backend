@@ -13,7 +13,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -23,52 +28,77 @@ public class TeacherAttendanceAnalyticsPageService {
     private final TeacherRepository teacherRepository;
     private final StudentSubjectRepository studentSubjectRepository;
 
-    @Cacheable(value = "teacherAttendanceAnalytics")
+    @Cacheable(value = "teacherAttendanceAnalytics", key = "#id + '_' + #section")
     public TeacherAttendanceAnalyticsDTO getTeacherAttendanceAnalyticsDTO(Long id, String section) {
 
-        Teacher teacher = teacherRepository.findById(id).orElseThrow(() ->
-                new IllegalArgumentException("Teacher with id " + id + " not found!"));
+        Teacher teacher = teacherRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Teacher not found"));
 
-        Long totalClassesHeld = studentSubjectRepository.getTotalClassesForTeacher(id, section).orElse(0L);
+        long totalClassesHeld = studentSubjectRepository
+                .getTotalClassesForTeacher(id, section)
+                .orElse(0L);
 
-        double averageAttendance = studentSubjectRepository.findAverageAttendance(id).orElse(0D);
+        List<Object[]> results = studentSubjectRepository.getAttendanceCountPerStudent(
+                id,
+                teacher.getSubject().getId(),
+                AttendaceStatusEnum.PRESENT
+        );
 
-        Long atRisk = studentSubjectRepository.findStudentsWithLowAttendance(id).orElse(0L);
+        Map<Long, Long> attendanceMap = results.stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> (Long) row[1]
+                ));
 
-        Section section1 = teacher.getSection();
+        Section sectionEntity = teacher.getSection();
 
-        List<AttendanceAnalyticsTableDTO> attendanceAnalyticsTableDTOList = section1.getStudents().stream()
-                .map(student -> mapToAttendanceAnalyticsDTO(student, teacher))
-                .toList();
+        double totalPercentageSum = 0;
+        long atRiskCount = 0;
+
+        List<AttendanceAnalyticsTableDTO> table = new ArrayList<>();
+
+        for (Student student : sectionEntity.getStudents()) {
+
+            Long attended = attendanceMap.getOrDefault(student.getId(), 0L);
+
+            double percentage = totalClassesHeld == 0
+                    ? 0
+                    : (attended * 100.0) / totalClassesHeld;
+
+            totalPercentageSum += percentage;
+
+            if (percentage < 75) {
+                atRiskCount++;
+            }
+
+            table.add(
+                    AttendanceAnalyticsTableDTO.builder()
+                            .id(student.getId())
+                            .name(student.getName())
+                            .rollNo(student.getRollNo())
+                            .attendancePercentage(roundTo2Decimal(percentage))
+                            .classesAttended(attended)
+                            .totalClassesHeld(totalClassesHeld)
+                            .build()
+            );
+        }
+
+        double averageAttendance = sectionEntity.getStudents().isEmpty()
+                ? 0
+                : totalPercentageSum / sectionEntity.getStudents().size();
 
         return TeacherAttendanceAnalyticsDTO.builder()
                 .id(id)
                 .totalClassesHeld(totalClassesHeld)
-                .averageAttendance(averageAttendance)
-                .atRisk(atRisk)
-                .attendanceAnalyticsTableDTOList(attendanceAnalyticsTableDTOList)
+                .averageAttendance(roundTo2Decimal(averageAttendance))
+                .atRisk(atRiskCount)
+                .attendanceAnalyticsTableDTOList(table)
                 .build();
-
     }
 
-    private AttendanceAnalyticsTableDTO mapToAttendanceAnalyticsDTO(Student student, Teacher teacher) {
-
-        double attendancePercentage = studentSubjectRepository.findAttendanceForStudent(student.getId(), teacher.getId(),
-                AttendaceStatusEnum.PRESENT);
-
-        Long totalClasses = studentSubjectRepository.getTotalClassesForTeacher(teacher.getId(), student.getSection().getName())
-                .orElse(0L);
-
-        Long classesAttended = studentSubjectRepository.getTotalClassesAttendedForSubject(student.getId(),
-                teacher.getSubject().getId(), AttendaceStatusEnum.PRESENT).orElse(0L);
-
-        return AttendanceAnalyticsTableDTO.builder()
-                .id(student.getId())
-                .name(student.getName())
-                .rollNo(student.getRollNo())
-                .attendancePercentage(attendancePercentage)
-                .classesAttended(classesAttended)
-                .totalClassesHeld(totalClasses)
-                .build();
+    public double roundTo2Decimal(double value) {
+        return BigDecimal.valueOf(value)
+                .setScale(2, RoundingMode.HALF_UP)
+                .doubleValue();
     }
 }

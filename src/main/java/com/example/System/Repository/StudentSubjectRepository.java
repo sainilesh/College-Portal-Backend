@@ -95,13 +95,18 @@ WHERE ss.teacher.id = :teacherId
     Optional<Double> findAverageAttendance(@Param("teacherId") Long teacherId);
 
     @Query("""
-SELECT COALESCE(
-AVG(CASE WHEN ss.attendanceStatus = :status THEN 100.0 ELSE 0.0 END),0)
+SELECT ss.student.id, COUNT(ss)
 FROM StudentSubject ss
 WHERE ss.teacher.id = :teacherId
-AND ss.student.id = :studentId
+AND ss.subject.id = :subjectId
+AND ss.attendanceStatus = :status
+GROUP BY ss.student.id
 """)
-    Double findAttendanceForStudent(@Param("teacherId") Long teacherId, @Param("studentId") Long studentId, @Param("status") AttendaceStatusEnum status);
+    List<Object[]> getAttendanceCountPerStudent(
+            Long teacherId,
+            Long subjectId,
+            AttendaceStatusEnum status
+    );
 
     @Query("""
 SELECT ss.student.section.name AS section

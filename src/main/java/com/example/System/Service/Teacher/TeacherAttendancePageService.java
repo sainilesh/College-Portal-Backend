@@ -73,13 +73,16 @@ public class TeacherAttendancePageService {
                 .build();
     }
 
-    //@CacheEvict(value = "attendancePage" , allEntries = true)
+    //email exception not allowing all entries to be added
+    @CacheEvict(value = "attendancePage" , allEntries = true)
     public void submitAttendance(Long id, List<StudentListRequestDTO> studentListRequestDTOS) {
 
         Teacher teacher = teacherRepository.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("Teacher not found!"));
 
         for (StudentListRequestDTO studentListRequestDTO : studentListRequestDTOS) {
+
+            System.out.println(studentListRequestDTO.getRollNo());
 
             Student student = studentRepository.findByRollNo(studentListRequestDTO.getRollNo()).orElseThrow(
                     () -> new IllegalArgumentException("Student not found!")

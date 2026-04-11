@@ -13,6 +13,22 @@ import java.time.LocalDateTime;
 @Builder
 public class TeacherLeaveRequestPageDTO {
 
+    public TeacherLeaveRequestPageDTO(
+            Long id,
+            String name,
+            LeaveReasonEnum leaveReason,
+            LocalDate startTime,           // 5th
+            LocalDate endTime,
+            LeaveStatusEnum leaveStatus
+    ) {
+        this.id = id;
+        this.name = name;
+        this.leaveReason = leaveReason;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.leaveStatus = leaveStatus;
+    }
+
     private Long id;
     private String name;
     private LeaveReasonEnum leaveReason;

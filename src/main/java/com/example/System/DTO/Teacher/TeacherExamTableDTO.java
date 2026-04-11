@@ -9,6 +9,12 @@ import lombok.*;
 @Builder
 public class TeacherExamTableDTO {
 
+    public TeacherExamTableDTO(Long id, String name, String rollNo) {
+        this.id = id;
+        this.name = name;
+        this.rollNo = rollNo;
+    }
+
     private Long id;
     private String name;
     private String rollNo;

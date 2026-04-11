@@ -1,5 +1,6 @@
 package com.example.System.Repository;
 
+import com.example.System.DTO.Teacher.TeacherLeaveRequestPageDTO;
 import com.example.System.Entity.Leave;
 import com.example.System.Enum.LeaveReasonEnum;
 import com.example.System.Enum.LeaveStatusEnum;
@@ -47,4 +48,19 @@ FROM Leave l
 WHERE l.status = 'PENDING'
 """)
     Optional<Long> findTotalPendingLeaves(@Param("teacherId") Long teacherId);
+
+    @Query("""
+SELECT new com.example.System.DTO.Teacher.TeacherLeaveRequestPageDTO(
+    l.id,
+    s.name,
+    l.leaveReason,
+    l.startDate,
+    l.endDate,
+    l.status
+)
+FROM Leave l
+JOIN l.student s
+WHERE l.teacher.id = :teacherId
+""")
+    List<TeacherLeaveRequestPageDTO> findLeaveDTOs(@Param("teacherId") Long teacherId);
 }

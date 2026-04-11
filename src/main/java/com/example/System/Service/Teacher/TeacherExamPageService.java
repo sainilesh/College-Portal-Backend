@@ -15,10 +15,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class TeacherExamPageService {
 
@@ -26,51 +28,57 @@ public class TeacherExamPageService {
     private final GradeRepository gradeRepository;
     private final StudentRepository studentRepository;
 
-    @Cacheable(value = "teacherExamPage")
+    @Cacheable(value = "teacherExamPage", key = "#id")
     public TeacherExamPageDTO getTeacherExamPage(Long id){
 
-        Teacher teacher = teacherRepository.findById(id).orElseThrow(() ->
-                new IllegalArgumentException("teacher not found!"));
+        Teacher teacher = teacherRepository.findTeacherWithStudents(id)
+                .orElseThrow(() -> new IllegalArgumentException("teacher not found!"));
 
-        List<TeacherExamTableDTO> teacherExamTableDTOS = teacher.getSection().getStudents().stream()
-                .map(this::mapToTeacherExamTableDTO)
-                .toList();
+        List<TeacherExamTableDTO> table = studentRepository.getExamTableDTOBySectionId(teacher.getSection().getId());
 
         return TeacherExamPageDTO.builder()
                 .id(id)
-                .teacherExamTableDTOList(teacherExamTableDTOS)
+                .teacherExamTableDTOList(table)
                 .build();
     }
 
-    public void updateStudentResults(List<TeacherExamPageRequest> teacherExamPageRequests, Long id){
+    @Transactional
+    public void updateStudentResults(List<TeacherExamPageRequest> requests, Long id){
 
-        Teacher teacher = teacherRepository.findById(id).orElseThrow(() ->
-                new IllegalArgumentException("teacher not found!"));
+        Teacher teacher = teacherRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("teacher not found!"));
 
-        for (TeacherExamPageRequest teacherExamPageRequest : teacherExamPageRequests) {
-            Student student = studentRepository.findByRollNo(teacherExamPageRequest.getRollNo()).orElseThrow(
-                    () -> new IllegalArgumentException("student not found!"));
+        List<String> rollNos = requests.stream()
+                .map(TeacherExamPageRequest::getRollNo)
+                .toList();
 
-            double grade = (teacherExamPageRequest.getEndTerm()+teacherExamPageRequest.getMidTerm())/10.0;
-            Grade grade1 = Grade.builder()
-                                .student(student)
-                                .grade(grade)
-                                .status(GradeStatusEnum.GRADED)
-                                .subject(teacher.getSubject())
-                                .build();
+        List<Student> students = studentRepository.findAllByRollNoIn(rollNos);
 
-            gradeRepository.save(grade1);
+        Map<String, Student> studentMap = students.stream()
+                .collect(Collectors.toMap(Student::getRollNo, s -> s));
 
+        List<Grade> grades = new ArrayList<>();
+
+        for (TeacherExamPageRequest req : requests) {
+
+            Student student = studentMap.get(req.getRollNo());
+
+            if (student == null) {
+                throw new IllegalArgumentException("Student not found: " + req.getRollNo());
+            }
+
+            double grade = (req.getEndTerm() + req.getMidTerm()) / 10.0;
+
+            grades.add(
+                    Grade.builder()
+                            .student(student)
+                            .grade(grade)
+                            .status(GradeStatusEnum.GRADED)
+                            .subject(teacher.getSubject())
+                            .build()
+            );
         }
 
-    }
-
-    private TeacherExamTableDTO mapToTeacherExamTableDTO(Student student) {
-        return TeacherExamTableDTO.builder()
-                .id(student.getId())
-                .name(student.getName())
-                .rollNo(student.getRollNo())
-                .email(null)
-                .build();
+        gradeRepository.saveAll(grades);
     }
 }
