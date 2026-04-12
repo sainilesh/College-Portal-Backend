@@ -1,5 +1,7 @@
 package com.example.System.Repository;
 
+import com.example.System.DTO.Student.Attendance.AttendanceTableDTO;
+import com.example.System.DTO.Student.Dashboard.AttendanceStatsProjection;
 import com.example.System.Entity.Student;
 import com.example.System.Entity.StudentSubject;
 import com.example.System.Enum.AttendaceStatusEnum;
@@ -55,28 +57,6 @@ AND ss.subject.id = :subjectId
 """)
     Optional<Long> getTotalClassesForSubject(@Param("studentId") Long studentId, @Param("subjectId") Long subjectId);
 
-    @Query("""
-SELECT ss
-FROM StudentSubject ss
-WHERE ss.student.id = :id
-AND (:subject IS NULL OR ss.subject.name = :subject)
-AND (:date IS NULL OR ss.conductedAt = :date)
-AND (:semester IS NULL OR ss.subject.semester.name = :semester)
-""")
-    Page<StudentSubject> findAllStudentAttendance(@Param("id") Long id, @Param("semester") String semester,
-                                                  @Param("subject")  String subject,
-                                                  @Param("date")LocalDate date,
-                                                  Pageable pageable);
-
-    @Query("""
-SELECT COUNT(DISTINCT ss.student.id)
-FROM StudentSubject ss
-WHERE ss.teacher.id = :teacherId
-GROUP BY ss.student.id
-HAVING (SUM(CASE WHEN ss.attendanceStatus = 'PRESENT' THEN 1 ELSE 0 END) * 100.0) / COUNT(ss) < 75
-""")
-    Optional<Long> findStudentsWithLowAttendance(@Param("teacherId") Long teacherId);
-
 
     @Query("""
 SELECT COUNT(ss)
@@ -87,12 +67,6 @@ AND s.section.name = :sectionName
 """)
     Optional<Long> getTotalClassesForTeacher(@Param("teacherId") Long teacherId, @Param("sectionName") String sectionName);
 
-    @Query("""
-SELECT (SUM(CASE WHEN ss.attendanceStatus = 'PRESENT' THEN 1 ELSE 0 END) * 100.0 / COUNT(*))
-FROM StudentSubject ss
-WHERE ss.teacher.id = :teacherId
-""")
-    Optional<Double> findAverageAttendance(@Param("teacherId") Long teacherId);
 
     @Query("""
 SELECT ss.student.id, COUNT(ss)
@@ -108,15 +82,6 @@ GROUP BY ss.student.id
             AttendaceStatusEnum status
     );
 
-    @Query("""
-SELECT ss.student.section.name AS section
-FROM StudentSubject ss
-WHERE ss.teacher.id = :teacherId
-GROUP BY ss.student.section
-ORDER BY
-(SUM(CASE WHEN ss.attendanceStatus = 'PRESENT' THEN 1 ELSE 0 END) * 100.0 / COUNT(ss)) ASC
-""")
-    List<String> findLeastAttendanceOfSection(@Param("teacherId") Long teacherId);
 
     @Query("""
 SELECT ss
@@ -136,6 +101,33 @@ HAVING
  / COUNT(ss) < 75
 """)
     List<Student> findStudentsBelow75();
+
+    @Query("""
+SELECT new com.example.System.DTO.Student.Attendance.AttendanceTableDTO(
+    ss.id,
+    ss.subject.name,
+    ss.conductedAt,
+    ss.attendanceStatus,
+    ss.remarks
+)
+FROM StudentSubject ss
+WHERE ss.student.id = :id
+AND (:semester IS NULL OR ss.subject.semester = :semester)
+AND (:subject IS NULL OR ss.subject.name = :subject)
+AND (:date IS NULL OR ss.conductedAt = :date)
+""")
+    Page<AttendanceTableDTO> getAttendanceTableDTOs(
+            Long id, String semester, String subject, LocalDate date, Pageable pageable);
+
+    @Query("""
+SELECT
+    COUNT(ss) as totalClasses,
+    SUM(CASE WHEN ss.attendanceStatus = :status THEN 1 ELSE 0 END) as attendedClasses
+FROM StudentSubject ss
+WHERE ss.student.id = :id
+""")
+    AttendanceStatsProjection getAttendanceStats(@Param("id") Long id,
+                                                 @Param("status") AttendaceStatusEnum status);
 
 }
 
