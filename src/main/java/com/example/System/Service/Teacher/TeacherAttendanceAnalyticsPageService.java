@@ -38,13 +38,9 @@ public class TeacherAttendanceAnalyticsPageService {
                 .getTotalClassesForTeacher(id, section)
                 .orElse(0L);
 
-        List<Object[]> results = studentSubjectRepository.getAttendanceCountPerStudent(
-                id,
-                teacher.getSubject().getId(),
-                AttendaceStatusEnum.PRESENT
-        );
-
-        Map<Long, Long> attendanceMap = results.stream()
+        Map<Long, Long> attendanceMap = studentSubjectRepository
+                .getAttendanceCountPerStudent(id, teacher.getSubject().getId(), AttendaceStatusEnum.PRESENT)
+                .stream()
                 .collect(Collectors.toMap(
                         row -> (Long) row[0],
                         row -> (Long) row[1]

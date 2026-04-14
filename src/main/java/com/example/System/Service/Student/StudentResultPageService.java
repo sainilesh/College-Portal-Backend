@@ -5,17 +5,20 @@ import com.example.System.DTO.Student.Results.StudentResultsPageDTO;
 import com.example.System.Entity.Grade;
 import com.example.System.Repository.GradeRepository;
 import com.example.System.Repository.SubjectRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class StudentResultPageService {
 
     private final GradeRepository gradeRepository;
@@ -26,36 +29,49 @@ public class StudentResultPageService {
             value = "studentResultsPage",
             key = "#studentId + ':' + #semester"
     )
+    @Transactional(readOnly = true)
     public StudentResultsPageDTO getStudentResult(Long studentId, String semester) {
 
         long totalObtainedCredits = 0;
         long backlogs = 0;
 
-        List<Grade> grades = gradeRepository.findByGradesBySemester(studentId, semester);
+        List<Grade> allGrades = gradeRepository.findByStudentIdWithSubject(studentId);
+
+        List<Grade> semesterGrades = allGrades.stream()
+                .filter(grade -> grade.getSubject().getSemester().getName().equals(semester))
+                .toList();
 
         List<ResultTableDTO> resultTableDTOS = new ArrayList<>();
 
-        for (Grade grade : grades) {
+        for (Grade grade : semesterGrades) {
             ResultTableDTO dto = maptoResultTableDTO(grade);
 
-            if (!dto.isPassed()) {
-                backlogs++;
-            }
+            if (!dto.isPassed()) backlogs++;
 
             totalObtainedCredits += dto.getCredits();
 
             resultTableDTOS.add(dto);
         }
 
-        double semesterGrade = gradeCalculation(grades);
-
-        List<Grade> grades1 = gradeRepository.findByStudentId(studentId);
+        double semesterGrade = gradeCalculation(semesterGrades);
 
         Long totalCredits = subjectRepository.findTotalCredits(semester).orElse(0L);
 
-        double overallGrade = gradeCalculation(grades1);
+        double overallGrade = gradeCalculation(allGrades);
 
-        double highestSGPA = gradeRepository.findHighestSGPA(studentId).orElse(0.0);
+        Map<String,Double> semsterGrades = allGrades.stream()
+                .collect(Collectors.groupingBy(
+                        grade -> grade.getSubject().getSemester().getName(),
+                        Collectors.collectingAndThen(
+                                Collectors.toList(),
+                                this::gradeCalculation
+                        )
+                ));
+
+        double highestSGPA = semsterGrades.values().stream()
+                .mapToDouble(Double::doubleValue)
+                .max()
+                .orElse(0.0);
 
         return StudentResultsPageDTO.builder()
                 .id(studentId)
@@ -66,6 +82,7 @@ public class StudentResultPageService {
                 .creditsObtained(totalObtainedCredits)
                 .backlogs(backlogs)
                 .highestGrade(highestSGPA)
+                .semesterGrades(semsterGrades)
                 .build();
     }
 
@@ -114,14 +131,21 @@ public class StudentResultPageService {
     }
 
     private double gradeCalculation(List<Grade> grades) {
+
         double gradeVal = grades.stream()
-                .mapToDouble(g -> g.getGrade() * (g.getGrade() >= 5 ? g.getSubject().getCredits() : 0))
+                .mapToDouble(g -> g.getGrade() * g.getSubject().getCredits())
                 .sum();
 
         double totalCredits = grades.stream()
-                .mapToLong(g -> g.getGrade() >= 5 ? g.getSubject().getCredits() : 0)
+                .mapToLong(g -> g.getSubject().getCredits())
                 .sum();
 
-        return totalCredits == 0 ? 0 : gradeVal / totalCredits;
+        return roundTo2Decimal(totalCredits == 0 ? 0 : gradeVal / totalCredits);
+    }
+
+    public double roundTo2Decimal(double value) {
+        return BigDecimal.valueOf(value)
+                .setScale(2, RoundingMode.HALF_UP)
+                .doubleValue();
     }
 }

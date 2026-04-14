@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 public interface DashboardRepository extends JpaRepository<Teacher, Long> {
 
     @Query(value = """
-SELECT 
+SELECT
   -- Low attendance students count
   (SELECT COUNT(*) FROM (
       SELECT ss.student_id
@@ -21,13 +21,13 @@ SELECT
   ) AS low_attendance_students) AS lowAttendance,
 
   -- Pending leaves
-  (SELECT COUNT(*) FROM leave l 
-   WHERE l.teacher_id = :id 
+  (SELECT COUNT(*) FROM leave l
+   WHERE l.teacher_id = :id
    AND l.status = 'PENDING') AS pendingLeaves,
 
   -- Average attendance across all students
   (SELECT AVG(attendance_percentage) FROM (
-      SELECT 
+      SELECT
         (SUM(CASE WHEN ss.attendance_status = 'PRESENT' THEN 1 ELSE 0 END) * 100.0 / COUNT(*)) AS attendance_percentage
       FROM student_subject ss
       WHERE ss.teacher_id = :id
@@ -40,7 +40,7 @@ SELECT
    JOIN student_subject ss ON ss.student_id = st.id
    WHERE ss.teacher_id = :id
    GROUP BY s.name
-   ORDER BY 
+   ORDER BY
      (SUM(CASE WHEN ss.attendance_status = 'PRESENT' THEN 1 ELSE 0 END) * 100.0 / COUNT(*)) ASC
    LIMIT 1) AS leastSection
 """, nativeQuery = true)

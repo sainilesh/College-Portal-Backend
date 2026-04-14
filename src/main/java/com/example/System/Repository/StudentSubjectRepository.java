@@ -107,11 +107,19 @@ SELECT new com.example.System.DTO.Student.Attendance.AttendanceTableDTO(
     ss.id,
     ss.subject.name,
     ss.conductedAt,
+    tt.startTime,
+    tt.endTime,
     ss.attendanceStatus,
     ss.remarks
 )
 FROM StudentSubject ss
-WHERE ss.student.id = :id
+JOIN ss.student st
+JOIN st.section sec
+JOIN TimeTable tt
+    ON tt.subject = ss.subject
+    AND tt.section = sec 
+    AND tt.dayOfWeek = FUNCTION('upper', FUNCTION('to_char', ss.conductedAt, 'FMDay'))
+WHERE st.id = :id
 AND (:semester IS NULL OR ss.subject.semester = :semester)
 AND (:subject IS NULL OR ss.subject.name = :subject)
 AND (:date IS NULL OR ss.conductedAt = :date)

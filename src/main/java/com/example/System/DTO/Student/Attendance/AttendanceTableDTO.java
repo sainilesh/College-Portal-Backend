@@ -17,11 +17,15 @@ public class AttendanceTableDTO implements Serializable {
     public AttendanceTableDTO(Long id,
                               String name,
                               LocalDate date,
+                              LocalTime startTime,
+                              LocalTime endTime,
                               AttendaceStatusEnum status,
                               String remarks) {
         this.id = id;
         this.name = name;
         this.date = date;
+        this.startTime = startTime;
+        this.endTime = endTime;
         this.status = status;
         this.remarks = remarks;
     }

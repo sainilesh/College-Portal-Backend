@@ -33,4 +33,13 @@ WHERE s.section.id = :sectionId
 
     List<Student> findAllByRollNoIn(List<String> rollNos);
 
+    @Query("""
+SELECT s 
+FROM Student s 
+JOIN FETCH s.section sec
+JOIN FETCH sec.teacher 
+WHERE s.id = :id
+""")
+    Optional<Student> findByIdAndFetch(Long id);
+
 }

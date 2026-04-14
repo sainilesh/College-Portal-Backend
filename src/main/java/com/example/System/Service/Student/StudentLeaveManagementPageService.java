@@ -11,7 +11,6 @@ import com.example.System.Enum.LeaveReasonEnum;
 import com.example.System.Enum.LeaveStatusEnum;
 import com.example.System.Repository.LeaveRepository;
 import com.example.System.Repository.StudentRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -19,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,7 +26,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class StudentLeaveManagementPageService {
 
@@ -34,18 +33,15 @@ public class StudentLeaveManagementPageService {
     private final LeaveRepository leaveRepository;
     private final StudentRepository studentRepository;
 
-
+    @Transactional(readOnly = true)
     public StudentLeaveManagementPageDTO getLeaveManagementPage(Long studentId, LeaveStatusEnum leaveStatus, LeaveReasonEnum leaveReason, int page, int size, LocalDate date) {
 
-        System.out.println("getting from db.......");
-
-        Long leavesTaken = leaveRepository.getTotalLeaves(studentId).orElseThrow(() ->
-                new IllegalArgumentException("No leaves for the student id"));
+        Long leavesTaken = leaveRepository.getTotalLeaves(studentId);
 
         Long pendingRequests = leaveRepository.countByStudentIdAndStatus(studentId, LeaveStatusEnum.PENDING)
                 .orElseThrow(() -> new IllegalArgumentException("No leaves for the student id"));
 
-        Long remainingLeaves = 20 - leavesTaken;
+        Long remainingLeaves = Math.max(0, 20 - leavesTaken);
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "endDate"));
 
@@ -64,6 +60,7 @@ public class StudentLeaveManagementPageService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
     private LeaveTableDTO mapToLeaveTableDTO(Leave leave) {
 
         return LeaveTableDTO.builder()
@@ -77,8 +74,9 @@ public class StudentLeaveManagementPageService {
                 .build();
     }
 
+    @Transactional
     public StudentLeaveManagementDetailsDTO getLeaveDetails(Long leaveId) {
-        Leave leave = leaveRepository.findById(leaveId).orElseThrow(() ->
+        Leave leave = leaveRepository.findByIdWithTeacher(leaveId).orElseThrow(() ->
                 new IllegalArgumentException("leave not found"));
 
         Long days = ChronoUnit.DAYS.between(leave.getStartDate(), leave.getEndDate()) + 1;
@@ -99,10 +97,14 @@ public class StudentLeaveManagementPageService {
 
     public void createNewLeave(Long id, LeaveRequestDTO leaveRequestDTO) {
 
-        Student student =  studentRepository.findById(id).orElseThrow(() ->
+        Student student =  studentRepository.findByIdAndFetch(id).orElseThrow(() ->
                 new IllegalArgumentException("student not found"));
 
         Teacher teacher = student.getSection().getTeacher();
+
+        if (leaveRequestDTO.getEndDate().isBefore(leaveRequestDTO.getStartDate())) {
+            throw new IllegalArgumentException("End date cannot be before start date");
+        }
 
         Leave leave = Leave.builder()
                 .startDate(leaveRequestDTO.getStartDate())
@@ -112,7 +114,6 @@ public class StudentLeaveManagementPageService {
                 .student(student)
                 .teacher(teacher)
                 .status(LeaveStatusEnum.PENDING)
-                .createdAt(LocalDateTime.now())
                 .build();
 
         leaveRepository.save(leave);

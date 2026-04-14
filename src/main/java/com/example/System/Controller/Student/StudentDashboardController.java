@@ -1,5 +1,6 @@
 package com.example.System.Controller.Student;
 
+import com.example.System.Configuration.RateLimiter.RateLimit;
 import com.example.System.DTO.Student.Dashboard.StudentDashboardPageDTO;
 import com.example.System.Entity.User;
 import com.example.System.Repository.UserRepository;
@@ -22,6 +23,7 @@ public class StudentDashboardController {
 
     @PreAuthorize("hasAuthority('STUDENT')")
     @GetMapping("/api/student/dashboard")
+    @RateLimit(limit = 5, window = 60)
     public ResponseEntity<StudentDashboardPageDTO> getStudentDashboardPage(@AuthenticationPrincipal UserDetails userDetails) {
         User user = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow();

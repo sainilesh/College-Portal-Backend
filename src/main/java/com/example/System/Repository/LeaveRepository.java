@@ -23,7 +23,7 @@ SELECT COALESCE(SUM((l.end_date - l.start_date) + 1), 0)
 FROM Leave l
 WHERE l.student_id = :studentId
 """, nativeQuery = true)
-    Optional<Long> getTotalLeaves(@Param("studentId") Long studentId);
+    Long getTotalLeaves(@Param("studentId") Long studentId);
 
     Optional<Long> countByStudentIdAndStatus(Long studentId, LeaveStatusEnum status);
 
@@ -43,13 +43,6 @@ AND (:endDate IS NULL OR l.endDate = endDate)
     );
 
     @Query("""
-SELECT COUNT(*)
-FROM Leave l
-WHERE l.status = 'PENDING'
-""")
-    Optional<Long> findTotalPendingLeaves(@Param("teacherId") Long teacherId);
-
-    @Query("""
 SELECT new com.example.System.DTO.Teacher.TeacherLeaveRequestPageDTO(
     l.id,
     s.name,
@@ -63,4 +56,8 @@ JOIN l.student s
 WHERE l.teacher.id = :teacherId
 """)
     List<TeacherLeaveRequestPageDTO> findLeaveDTOs(@Param("teacherId") Long teacherId);
+
+
+    @Query("SELECT l FROM Leave l JOIN FETCH l.teacher WHERE l.id = :leaveId")
+    Optional<Leave> findByIdWithTeacher(@Param("leaveId") Long leaveId);
 }

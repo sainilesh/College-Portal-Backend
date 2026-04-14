@@ -4,6 +4,7 @@ import lombok.*;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -18,7 +19,7 @@ public class StudentResultsPageDTO implements Serializable {
     private Long creditsObtained;
     private Long totalCredits;
     private List<ResultTableDTO> resultTables;
-    private List<Long> semesterGrades;
+    private Map<String,Double> semesterGrades;
     private Long backlogs;
     private double highestGrade;
 
