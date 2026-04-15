@@ -11,6 +11,7 @@ import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -55,6 +56,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiException> handleAuthenticationCredentialsNotFoundException(AuthenticationCredentialsNotFoundException e) {
         ApiException apiException = new ApiException("Authentication credentials not found", HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(apiException, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(HttpClientErrorException.TooManyRequests.class)
+    public ResponseEntity<ApiException> handleRequestsException(HttpClientErrorException.TooManyRequests e) {
+        ApiException apiException = new ApiException(e.getMessage(), HttpStatus.TOO_MANY_REQUESTS);
+        return new ResponseEntity<>(apiException, HttpStatus.TOO_MANY_REQUESTS);
     }
 
 }

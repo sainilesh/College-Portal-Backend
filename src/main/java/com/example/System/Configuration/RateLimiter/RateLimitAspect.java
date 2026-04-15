@@ -37,10 +37,13 @@ public class RateLimitAspect {
             key = "ip" + request.getRemoteAddr() + ":" + endpoint;
         }
 
+        int limit = rateLimit.limit() != 0 ? rateLimit.limit() : 5;
+        int window = rateLimit.window() != 0 ? rateLimit.window() : 5;
+
         boolean allowed = rateLimiter.isAllowed(
                 key,
-                rateLimit.limit(),
-                rateLimit.window()
+                limit,
+                window
         );
 
         if(!allowed) {

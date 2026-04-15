@@ -13,7 +13,8 @@ public class AttendanceEmailConsumer {
 
     private final EmailService emailService;
 
-    @RabbitListener(queues = "attendance.queue")
+    @RabbitListener(queues = "attendance.queue",
+    containerFactory = "rabbitListenerContainerFactory")
     public void handleAttendanceEvent(AttendanceEvent event) {
 
         emailService.sendMail(event.getStudentEmail(), "Attendance status",

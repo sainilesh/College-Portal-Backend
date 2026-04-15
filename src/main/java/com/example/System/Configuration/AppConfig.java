@@ -11,8 +11,11 @@ import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.*;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.time.Duration;
+import java.util.concurrent.Executor;
 
 
 @Configuration
@@ -58,5 +61,21 @@ public class AppConfig {
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(config)
                 .build();
+    }
+
+    @Configuration
+    @EnableAsync
+    public class AsyncConfig {
+
+        @Bean(name = "taskExecutor")
+        public Executor taskExecutor() {
+            ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+            executor.setCorePoolSize(5);
+            executor.setMaxPoolSize(10);
+            executor.setQueueCapacity(100);
+            executor.setThreadNamePrefix("Email-");
+            executor.initialize();
+            return executor;
+        }
     }
 }
