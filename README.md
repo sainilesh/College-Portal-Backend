@@ -11,7 +11,7 @@ The project demonstrates backend engineering concepts such as **JWT authenticati
 
 ### Authentication & Security
 
-* JWT based authentication
+* JWT based authentications
 * Refresh token system with secure cookies
 * OTP based password reset using email
 * Role based authorization (Student / Teacher / Admin)
