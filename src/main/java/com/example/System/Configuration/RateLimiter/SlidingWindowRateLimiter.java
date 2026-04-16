@@ -17,7 +17,7 @@ public class SlidingWindowRateLimiter {
 
         String redisKey = "rate_limit:" + key;
         long now = System.currentTimeMillis();
-        long windowStart = now - (windowSeconds * 1000);
+        long windowStart = now - (windowSeconds * 1000L);
 
         ZSetOperations<String, String> zSet = redisTemplate.opsForZSet();
 

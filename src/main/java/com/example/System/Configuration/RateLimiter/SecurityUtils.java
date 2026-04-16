@@ -12,6 +12,6 @@ public class SecurityUtils {
             return null;
         }
 
-        return auth.getName(); // usually username or userId
+        return auth.getName();
     }
 }
