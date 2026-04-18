@@ -1,5 +1,8 @@
 package com.example.System.Authentication;
 
+import com.example.System.Enum.RoleType;
+import com.example.System.Repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NonNull;
@@ -12,13 +15,21 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Map;
+
 
 @Component
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     @Autowired
     private OAuth2AuthorizedClientService authorizedClientService;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private GoogleAccountService  googleAccountService;
 
 
     @Override
@@ -40,14 +51,30 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             refreshToken = client.getRefreshToken().getTokenValue();
         }
 
+        Instant expiry = client.getAccessToken().getExpiresAt();
+
         Map<String, Object> attributes = oauthToken.getPrincipal().getAttributes();
         String email = (String) attributes.get("email");
 
-        System.out.println("EMAIL: " + email);
-        System.out.println("ACCESS TOKEN: " + accessToken);
-        System.out.println("REFRESH TOKEN: " + refreshToken);
+        Long userId = (Long) request.getSession().getAttribute("userId");
+        RoleType role = getCurrentUserRole(email);
 
+        googleAccountService.saveOrUpdate(
+                email,
+                accessToken,
+                refreshToken,
+                expiry,
+                2L,
+                role
+        );
+
+        request.getSession().removeAttribute("userId");
 
         response.sendRedirect("http://localhost:8080/api/teacher/dashboard");
+    }
+
+    private RoleType getCurrentUserRole(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() -> new
+                EntityNotFoundException("user not found")).getRoles();
     }
 }

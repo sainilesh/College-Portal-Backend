@@ -53,13 +53,20 @@ public class AuthService {
 
         String refreshToken = createRefreshToken(user);
 
-        Cookie cookie = new Cookie("refresh_token", refreshToken);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false);
-        cookie.setPath("/auth");
-        cookie.setMaxAge(7 * 24 * 60 * 60);
+        Cookie refreshCookie = new Cookie("refresh_token", refreshToken);
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setSecure(false);
+        refreshCookie.setPath("/auth");
+        refreshCookie.setMaxAge(7 * 24 * 60 * 60);
 
-        response.addCookie(cookie);
+//        Cookie jwtCookie = new Cookie("jwt_token", token);
+//        jwtCookie.setHttpOnly(true);
+//        jwtCookie.setSecure(false);
+//        jwtCookie.setPath("/auth");
+//        jwtCookie.setMaxAge(20 * 60);
+//
+//        response.addCookie(jwtCookie);
+        response.addCookie(refreshCookie);
 
         return new LoginResponseDto(token, user.getId());
     }

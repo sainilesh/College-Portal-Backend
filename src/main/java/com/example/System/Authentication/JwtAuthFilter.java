@@ -4,8 +4,10 @@ package com.example.System.Authentication;
 
 import com.example.System.Entity.User;
 import com.example.System.Repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 @Component
 @Slf4j
@@ -40,6 +43,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response);
                 return;
             }
+
+//            Cookie[] cookies = request.getCookies();
+//
+//            String jwt = Arrays.stream(cookies)
+//                    .filter(cookie -> cookie.getName().equals("jwt_token"))
+//                    .findFirst()
+//                    .map(Cookie::getValue)
+//                    .orElseThrow(() -> new EntityNotFoundException("jwt token not found"));
 
             String token = requestTokenHeader.split("Bearer ")[1];
             String username = authUtil.getUsernameFromToken(token);

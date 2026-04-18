@@ -2,19 +2,20 @@ package com.example.System.Authentication;
 
 
 import com.example.System.DTO.Security.*;
+import com.example.System.Entity.User;
+import com.example.System.Repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.Getter;
 import org.springframework.http.ResponseEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 @RestController
@@ -23,6 +24,8 @@ import java.util.Arrays;
 public class AuthController {
 
     private final AuthService authService;
+    private final UserRepository userRepository;
+    private final GoogleAccountService googleAccountService;
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto, HttpServletResponse response) {
@@ -60,4 +63,20 @@ public class AuthController {
         return ResponseEntity.ok(loginResponseDto);
 
     }
+
+    @GetMapping("/connect/google")
+    public void connectGoogle(HttpServletRequest request,
+                              HttpServletResponse response,
+                              @AuthenticationPrincipal UserDetails userDetails) throws IOException {
+
+        User user = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow();
+
+        Long userId = user.getStudent().getId();
+
+        request.getSession().setAttribute("userId", 2L);
+
+        response.sendRedirect("/oauth2/authorization/google");
+    }
+
 }
