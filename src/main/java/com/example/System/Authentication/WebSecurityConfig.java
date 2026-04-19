@@ -1,5 +1,8 @@
 package com.example.System.Authentication;
 
+import com.example.System.Authentication.OAuth.CustomAuthorizationRequestResolver;
+import com.example.System.Authentication.OAuth.OAuth2SuccessHandler;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -9,7 +12,6 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -30,31 +32,40 @@ public class WebSecurityConfig {
 
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity,
-                                                   ClientRegistrationRepository repo) throws Exception {
-        httpSecurity
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+        http
                 .csrf(AbstractHttpConfigurer::disable)
-                //.sessionManagement(sessionConfig ->
-                        //sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers( "/auth/**").permitAll()
-                        .anyRequest().authenticated()
+                        // OAuth endpoints
+                        .requestMatchers("/oauth2/**", "/login/**").permitAll()
+
+                        // Auth endpoints
+                        .requestMatchers("/auth/**").permitAll()
+
+                        // 🔥 API endpoints MUST require JWT
+                        .requestMatchers("/api/**").authenticated()
+
+                        .anyRequest().permitAll()
                 )
+
+                // 🔥 OAuth only for specific endpoints
                 .oauth2Login(oauth -> oauth
-                        .authorizationEndpoint(authEndpoint -> authEndpoint
-                                .authorizationRequestResolver(
-                                        new CustomAuthorizationRequestResolver(repo)
-                                )
-                        )
                         .successHandler(oAuth2SuccessHandler)
                 )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(exceptionHandlingConfigurer ->
-                        exceptionHandlingConfigurer.accessDeniedHandler((request, response, accessDeniedException) -> {
-                            handlerExceptionResolver.resolveException(request, response, null, accessDeniedException);
-                        }));
 
-        return httpSecurity.build();
+                // 🔥 CRITICAL: Different entry point for API
+                .exceptionHandling(ex -> ex
+                        .defaultAuthenticationEntryPointFor(
+                                (req, res, e) -> res.sendError(401),
+                                request -> request.getRequestURI().startsWith("/api/")
+                        )
+                )
+
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
     }
 
     @Bean

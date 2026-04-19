@@ -1,14 +1,14 @@
 package com.example.System.Authentication;
 
 
+import com.example.System.Authentication.OAuth.GoogleAccountService;
 import com.example.System.DTO.Security.*;
-import com.example.System.Entity.User;
+import com.example.System.GoogleClassroom.GoogleClassroomRestService;
 import com.example.System.Repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.Getter;
 import org.springframework.http.ResponseEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,6 +26,7 @@ public class AuthController {
     private final AuthService authService;
     private final UserRepository userRepository;
     private final GoogleAccountService googleAccountService;
+    private final GoogleClassroomRestService  googleClassroomRestService;
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto, HttpServletResponse response) {
@@ -65,18 +66,13 @@ public class AuthController {
     }
 
     @GetMapping("/connect/google")
-    public void connectGoogle(HttpServletRequest request,
-                              HttpServletResponse response,
-                              @AuthenticationPrincipal UserDetails userDetails) throws IOException {
-
-        User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow();
-
-        Long userId = user.getStudent().getId();
+    public void connectGoogle(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
 
         request.getSession().setAttribute("userId", 2L);
 
         response.sendRedirect("/oauth2/authorization/google");
     }
+
 
 }

@@ -36,21 +36,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         try {
             log.info("incoming request: {}", request.getRequestURI());
 
-            String path = request.getRequestURI();
-
             final String requestTokenHeader = request.getHeader("Authorization");
             if (requestTokenHeader == null || !requestTokenHeader.startsWith("Bearer")) {
                 filterChain.doFilter(request, response);
                 return;
             }
-
-//            Cookie[] cookies = request.getCookies();
-//
-//            String jwt = Arrays.stream(cookies)
-//                    .filter(cookie -> cookie.getName().equals("jwt_token"))
-//                    .findFirst()
-//                    .map(Cookie::getValue)
-//                    .orElseThrow(() -> new EntityNotFoundException("jwt token not found"));
 
             String token = requestTokenHeader.split("Bearer ")[1];
             String username = authUtil.getUsernameFromToken(token);

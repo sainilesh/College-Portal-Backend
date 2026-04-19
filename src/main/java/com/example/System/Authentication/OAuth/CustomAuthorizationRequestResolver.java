@@ -1,4 +1,4 @@
-package com.example.System.Authentication;
+package com.example.System.Authentication.OAuth;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -38,7 +38,6 @@ public class CustomAuthorizationRequestResolver implements OAuth2AuthorizationRe
 
         Map<String, Object> extraParams = new HashMap<>(req.getAdditionalParameters());
 
-        // 🔥 THIS is the real fix
         extraParams.put("access_type", "offline");
         extraParams.put("prompt", "consent");
 

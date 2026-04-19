@@ -1,4 +1,4 @@
-package com.example.System.Authentication;
+package com.example.System.Authentication.OAuth;
 
 import com.example.System.Entity.GoogleAccount;
 import com.example.System.Enum.RoleType;
@@ -51,6 +51,8 @@ public class GoogleAccountService {
 
         GoogleAccount account = repository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Google account not connected"));
+
+        System.out.println(account.getAccessToken());
 
         if (account.getExpiryTime().isAfter(Instant.now().plusSeconds(60))) {
             return account.getAccessToken();

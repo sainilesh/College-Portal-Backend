@@ -1,4 +1,4 @@
-package com.example.System.Authentication;
+package com.example.System.Authentication.OAuth;
 
 import com.example.System.Enum.RoleType;
 import com.example.System.Repository.UserRepository;
@@ -29,7 +29,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private UserRepository userRepository;
 
     @Autowired
-    private GoogleAccountService  googleAccountService;
+    private GoogleAccountService googleAccountService;
 
 
     @Override
@@ -64,7 +64,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 accessToken,
                 refreshToken,
                 expiry,
-                2L,
+                userId,
                 role
         );
 

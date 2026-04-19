@@ -21,10 +21,10 @@ public class GoogleAccount {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, columnDefinition = "TEXT")
     private String accessToken;
 
-    @Column(unique = true)
+    @Column(unique = true, columnDefinition = "TEXT")
     private String refreshToken;
 
     private Instant expiryTime;
