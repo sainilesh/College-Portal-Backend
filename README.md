@@ -7,7 +7,7 @@ The project demonstrates backend engineering concepts such as **JWT authenticati
 
 ---
 
-## Features
+## Feature
 
 ### Authentication & Security
 
