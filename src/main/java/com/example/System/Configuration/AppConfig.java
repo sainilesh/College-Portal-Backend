@@ -13,6 +13,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.*;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
 import java.util.concurrent.Executor;
@@ -76,6 +77,11 @@ public class AppConfig {
             executor.setThreadNamePrefix("Email-");
             executor.initialize();
             return executor;
+        }
+
+        @Bean
+        public RestTemplate restTemplate() {
+            return new RestTemplate();
         }
     }
 }
